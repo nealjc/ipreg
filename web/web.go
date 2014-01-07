@@ -8,7 +8,7 @@ import(
 	"net"
 	"net/http"
 	"fmt"
-	"github.com/nealjc/netmonitor/scanner"
+	"github.com/nealjc/ipreg/scanner"
 	"encoding/json"
 	"log"
 )
