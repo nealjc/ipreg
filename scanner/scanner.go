@@ -27,6 +27,19 @@ func (s *NodeStatus) UpdateStatus(status int32) {
 	atomic.StoreInt32(&s.Status, status)
 }
 
+type Subnet struct {
+	Name string
+	Network string
+	Netmask string
+	Nodes map[string]*NodeStatus
+}
+
+func NewSubnet(name, network, netmask string) *Subnet {
+	subnet := Subnet{name, network, netmask,
+		make(map[string]*NodeStatus)}
+	return &subnet
+}
+
 func checkHost(address string) ScanResult {
 	con, err := net.DialTimeout("tcp", net.JoinHostPort(address, "22"),
 		time.Duration(5) * time.Second)
@@ -110,11 +123,3 @@ func StopScanner() {
 	<- scannerControl
 	log.Print("Scanner stopped")
 }
-
-
-
-
-
-
-
-
