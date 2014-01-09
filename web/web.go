@@ -27,9 +27,9 @@ func (s *StatusPage) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "%s", b)
 }
 
-func StartServer(status map[string]*scanner.NodeStatus) {
+func StartServer(status []*scanner.Subnet) {
 	serverControl = make(chan bool)
-	statusPage := StatusPage{status}
+	statusPage := StatusPage{status[0].Nodes}
 	server := http.Server{
 		Addr: ":8080",
 		Handler: nil,

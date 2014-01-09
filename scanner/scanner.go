@@ -30,13 +30,14 @@ func (s *NodeStatus) UpdateStatus(status int32) {
 type Subnet struct {
 	Name string
 	Network string
-	Netmask string
 	Nodes map[string]*NodeStatus
+	OrderedAddresses []string
 }
 
-func NewSubnet(name, network, netmask string) *Subnet {
-	subnet := Subnet{name, network, netmask,
-		make(map[string]*NodeStatus)}
+func NewSubnet(name, network string) *Subnet {
+	subnet := Subnet{name, network,
+		make(map[string]*NodeStatus),
+		make([]string, 0, 255)} // 255 probably most common
 	return &subnet
 }
 
@@ -102,16 +103,20 @@ func runScan(toScan map[string]*NodeStatus) {
 	}
 }
 
-func StartScanner(toScan map[string]*NodeStatus) {
+func StartScanner(toScan []*Subnet) {
 	scannerControl = make(chan bool)
+	done := false
 	for {
 		log.Println("Running network scanner");
-		runScan(toScan)
+		runScan(toScan[0].Nodes)
 		timeout := time.After(time.Duration(10)*time.Minute)
 		select {
 		case <- timeout:
 			continue
 		case <- scannerControl:
+			done = true
+		}
+		if done {
 			break
 		}
 	}
@@ -119,6 +124,7 @@ func StartScanner(toScan map[string]*NodeStatus) {
 }
 
 func StopScanner() {
+	log.Print("Stopping scanner")
 	scannerControl <- true
 	<- scannerControl
 	log.Print("Scanner stopped")
