@@ -9,7 +9,7 @@ import(
 )
 
 type ScanResult struct {
-	Address string
+	Address AddrToSubnet
 	IsUp bool
 }
 
@@ -34,6 +34,11 @@ type Subnet struct {
 	OrderedAddresses []string
 }
 
+type AddrToSubnet struct {
+	Address string
+	Subnet *Subnet
+}
+
 func NewSubnet(name, network string) *Subnet {
 	subnet := Subnet{name, network,
 		make(map[string]*NodeStatus),
@@ -41,8 +46,8 @@ func NewSubnet(name, network string) *Subnet {
 	return &subnet
 }
 
-func checkHost(address string) ScanResult {
-	con, err := net.DialTimeout("tcp", net.JoinHostPort(address, "22"),
+func checkHost(address AddrToSubnet) ScanResult {
+	con, err := net.DialTimeout("tcp", net.JoinHostPort(address.Address, "22"),
 		time.Duration(5) * time.Second)
 	if err != nil {
 		if netErr, ok := err.(*net.OpError); ok {
@@ -58,11 +63,11 @@ func checkHost(address string) ScanResult {
 	return ScanResult{address, true}
 }
 
-func scanNetwork(addresses []string) <- chan ScanResult {
+func scanNetwork(addresses []AddrToSubnet) <- chan ScanResult {
 	results := make(chan ScanResult)
 
 	for _, address := range(addresses) {
-		go func(addr string) {
+		go func(addr AddrToSubnet) {
 			results <- checkHost(addr)
 		}(address)
 	}
@@ -71,12 +76,18 @@ func scanNetwork(addresses []string) <- chan ScanResult {
 
 var scannerControl chan bool
 
-func runScan(toScan map[string]*NodeStatus) {
-	addresses := make([]string, len(toScan))
+func runScan(toScan []*Subnet) {
+	totalNumAddresses := 0
+	for _, subnet := range(toScan) {
+		totalNumAddresses += len(subnet.Nodes)
+	}
+	addresses := make([]AddrToSubnet, totalNumAddresses)
 	i := 0
-	for k := range(toScan) {
-		addresses[i] = k
-		i++
+	for _, subnet := range(toScan) {
+		for addr := range(subnet.Nodes) {
+			addresses[i] = AddrToSubnet{addr, subnet}
+			i++
+		}
 	}
 	resultChannel := scanNetwork(addresses)
 	timeout := time.After(time.Duration(1) * time.Minute)
@@ -87,7 +98,8 @@ func runScan(toScan map[string]*NodeStatus) {
 			log.Print("Scan timed out")
 			break
 		case r := <- resultChannel:
-			status := toScan[r.Address]
+			subnet := r.Address.Subnet
+			status := subnet.Nodes[r.Address.Address]
 			if r.IsUp {
 				status.UpdateStatus(UP)
 			} else {
@@ -108,7 +120,7 @@ func StartScanner(toScan []*Subnet) {
 	done := false
 	for {
 		log.Println("Running network scanner");
-		runScan(toScan[0].Nodes)
+		runScan(toScan)
 		timeout := time.After(time.Duration(10)*time.Minute)
 		select {
 		case <- timeout:
