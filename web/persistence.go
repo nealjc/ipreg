@@ -1,6 +1,7 @@
 package web
 
 import (
+	"log"
 	"database/sql"
 	_ "github.com/mattn/go-sqlite3"
 )
@@ -15,12 +16,12 @@ type DbConnection struct {
 	*sql.DB
 }
 
-// TODO: Is sql.DB thread-safe?
 func InitializeDB() (*DbConnection, error) {
 	conn, err := sql.Open("sqlite3", "./test.db")
 	if err != nil {
 		return nil, err
 	}
+	
 	sql := `
 create table if not exists RegisteredUsers (address text primary key, name text,
 email text, note text);
@@ -35,6 +36,35 @@ email text, note text);
 
 func (conn *DbConnection) SetRegistration(address string,
 	record RegistrationRecord) bool {
+	rows, err := conn.Query("select * from RegisteredUsers where address = ?", address)
+	if err != nil {
+		return false
+	}
+	defer rows.Close()
+	if rows.Next() {
+		return doPreparedStatement(conn,
+			"update RegisteredUsers set name=?, email=?, note=? where address=?",
+			record.Name, record.Email, record.Note, address)
+	} else {
+		return doPreparedStatement(conn,
+			"insert into RegisteredUsers values (?, ?, ?, ?)",
+			address, record.Name, record.Email, record.Note)
+	}
+}
+
+func doPreparedStatement(conn *DbConnection, statement string,
+	arguments ...interface{}) bool {
+	
+	stmt, err := conn.Prepare(statement)
+	if err != nil {
+		log.Printf("Failed create statement %q", err.Error())
+		return false
+	}
+	_, err = stmt.Exec(arguments...)
+	if err != nil {
+		log.Printf("Failed execute statement %q", err.Error())
+		return false
+	}
 	return true
 }
 
@@ -53,13 +83,5 @@ func (conn *DbConnection) GetRegistration(address string) (RegistrationRecord, e
 }
 
 func (conn *DbConnection)  DeleteRegistration(address string) bool {
-	stmt, err := conn.Prepare("delete from RegisteredUsers where address = ?")
-	if err != nil {
-		return false
-	}
-	_, err = stmt.Exec(address)
-	if err != nil {
-		return false
-	}
-	return true
+	return doPreparedStatement(conn, "delete from RegisteredUsers where address = ?", address)
 }
