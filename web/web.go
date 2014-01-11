@@ -31,11 +31,14 @@ import(
 )
 
 var serverControl chan bool
+var database *DbConnection
 
 func StartServer(status []*scanner.Subnet) {
-	if !InitializeDB() {
+	db, err := InitializeDB()
+	if err != nil {
 		log.Fatal("Failed to load database")
 	}
+	database = db
 	serverControl = make(chan bool)
 	statusPage := StatusPage{status}
 	server := http.Server{
@@ -61,6 +64,7 @@ func StartServer(status []*scanner.Subnet) {
 func StopServer() {
 	serverControl <- true
 	<- serverControl
+	database.Close()
 }
 
 type StatusPage struct {
@@ -170,7 +174,7 @@ func (s *StatusPage) validAddress(address string) bool {
 }
 
 func (s *StatusPage) handleGetStatus(w http.ResponseWriter, address string) {
-	reg, err := GetRegistration(address)
+	reg, err := database.GetRegistration(address)
 	if err != nil {
 		log.Printf("Failed to lookup registration %s", address)
 	}
@@ -209,13 +213,13 @@ func (s *StatusPage) handlePutStatus(w http.ResponseWriter, r *http.Request,
 		return
 	}
 	log.Printf("Updating reg info %+v for  %s", registration, address)
-	SetRegistration(address, registration)
+	database.SetRegistration(address, registration)
 	w.WriteHeader(http.StatusOK)
 }
 
 func (s *StatusPage) handleDeleteStatus(w http.ResponseWriter, address string) {
 	log.Printf("User is deleting reg for %s", address)
-	DeleteRegistration(address)
+	database.DeleteRegistration(address)
 	w.WriteHeader(http.StatusOK)
 }
 
