@@ -30,7 +30,12 @@ import(
 	"strings"
 )
 
+var serverControl chan bool
+
 func StartServer(status []*scanner.Subnet) {
+	if !InitializeDB() {
+		log.Fatal("Failed to load database")
+	}
 	serverControl = make(chan bool)
 	statusPage := StatusPage{status}
 	server := http.Server{
@@ -51,7 +56,6 @@ func StartServer(status []*scanner.Subnet) {
 	}
 	serverControl <- true
 	log.Print("HTTP Server stopped")
-
 }
 
 func StopServer() {
@@ -62,8 +66,6 @@ func StopServer() {
 type StatusPage struct {
 	Subnets []*scanner.Subnet
 }
-
-var serverControl chan bool
 
 func (s *StatusPage) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	path := strings.Split(r.URL.Path, "/")
@@ -168,10 +170,23 @@ func (s *StatusPage) validAddress(address string) bool {
 }
 
 func (s *StatusPage) handleGetStatus(w http.ResponseWriter, address string) {
+	reg, err := GetRegistration(address)
+	if err != nil {
+		log.Printf("Failed to lookup registration %s", address)
+	}
 	for _, subnet := range(s.Subnets) {
 		if status, ok := subnet.Nodes[address]; ok {
+			withStatus := make(map[string]string)
+			withStatus["Name"] = reg.Name
+			withStatus["Email"] = reg.Email
+			withStatus["Note"] = reg.Note
+			withStatus["Status"] = formatStatus(status)
+			b, err := json.Marshal(withStatus)
+			if err != nil {
+				log.Printf("Failed to marshal registration %s", address)
+			}
 			w.WriteHeader(http.StatusOK)
-			fmt.Fprintf(w, "%s", formatStatus(status))
+			fmt.Fprintf(w, "%s", b)
 			return
 		}
 	}
@@ -186,12 +201,7 @@ func (s *StatusPage) handlePutStatus(w http.ResponseWriter, r *http.Request,
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	type RegInfo struct {
-		Name string
-		Email string
-		Note string
-	}
-	var registration RegInfo
+	var registration RegistrationRecord
 	err = json.Unmarshal(data, &registration)
 	if err != nil {
 		log.Printf("Error unmarshaling request body for %s", address)
@@ -199,11 +209,13 @@ func (s *StatusPage) handlePutStatus(w http.ResponseWriter, r *http.Request,
 		return
 	}
 	log.Printf("Updating reg info %+v for  %s", registration, address)
+	SetRegistration(address, registration)
 	w.WriteHeader(http.StatusOK)
 }
 
 func (s *StatusPage) handleDeleteStatus(w http.ResponseWriter, address string) {
 	log.Printf("User is deleting reg for %s", address)
+	DeleteRegistration(address)
 	w.WriteHeader(http.StatusOK)
 }
 
