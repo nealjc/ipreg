@@ -1,0 +1,10 @@
+[Parameters]
+; run the scanner every hour
+TimeBetweenScansInMinutes = 60
+
+; one or more sections for each subnet
+[Subnet "Foo"]
+Network = 192.168.1.0/24
+
+[Subnet "Bar"]
+Network = 192.168.2.0/24

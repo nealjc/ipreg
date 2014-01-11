@@ -7,6 +7,7 @@ import(
 	"log"
 	"github.com/nealjc/ipreg/web"
 	"github.com/nealjc/ipreg/scanner"
+	"code.google.com/p/gcfg"
 )
 
 
@@ -33,19 +34,36 @@ func generateAllInSubnet(ipNet *net.IPNet, subnet *scanner.Subnet) {
 }
 
 func readSubnets() (subnets []*scanner.Subnet, e error) {
-	// TODO: read from config file
-	fromConfig := "192.168.1.0/24"
-	_, ipNet, e := net.ParseCIDR(fromConfig)
+	inputFile := "./config.txt"
+	type Config struct {
+		Parameters struct {
+			TimeBetweenScansInMinutes int
+		}
+		Subnet map[string]*struct {
+			Network string
+		}
+	}
+	config := Config{}
+	e = gcfg.ReadFileInto(&config, inputFile)
 	if e != nil {
 		return nil, e
 	}
-	sub := scanner.NewSubnet("First Subnet", ipNet.String())
-	generateAllInSubnet(ipNet, sub)
-	subnets = append(subnets, sub)
+
+	for subnetName, network := range(config.Subnet) {
+		log.Printf("Adding subnet %s %s", subnetName, network.Network)
+		_, ipNet, e := net.ParseCIDR(network.Network)
+		if e != nil {
+			return nil, e
+		}
+		sub := scanner.NewSubnet(subnetName, ipNet.String())
+		generateAllInSubnet(ipNet, sub)
+		subnets = append(subnets, sub)
+	}
 	return
 }
 
 func main() {
+	// TODO: require config file input
 	subnets, e := readSubnets()
 	if e != nil {
 		log.Fatal(e.Error())
