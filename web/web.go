@@ -11,6 +11,7 @@ GETs
 
 PUTs
 /status/<address>
+{"Name":"Neal", "Email":"ncharbonneau@gmail.com", "Note":"Using for VM x"}
 
 DELETE
 /status/<address>
@@ -22,6 +23,7 @@ import(
 	"net"
 	"net/http"
 	"fmt"
+	"io/ioutil"
 	"github.com/nealjc/ipreg/scanner"
 	"encoding/json"
 	"log"
@@ -65,6 +67,7 @@ var serverControl chan bool
 
 func (s *StatusPage) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	path := strings.Split(r.URL.Path, "/")
+	// TODO: index
 	log.Printf("Request to %q", path[1])
 	switch (path[1]) {
 	case "subnets":
@@ -137,8 +140,34 @@ func (s *StatusPage) lookupSubnet(name string) int {
 }
 
 func (s *StatusPage) handleStatus(w http.ResponseWriter, r *http.Request) {
-
+	// TODO: index
 	address := strings.Split(r.URL.Path, "/")[2]
+	if !s.validAddress(address) {
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+	
+	if r.Method == "GET" {
+		s.handleGetStatus(w, address)
+	} else if r.Method == "PUT" {
+		s.handlePutStatus(w, r, address)
+	} else if r.Method == "DELETE" {
+		s.handleDeleteStatus(w, address)
+	} else {
+		w.WriteHeader(http.StatusBadRequest)
+	}
+}
+
+func (s *StatusPage) validAddress(address string) bool {
+	for _, subnet := range(s.Subnets) {
+		if _, ok := subnet.Nodes[address]; ok {
+			return true
+		}
+	}
+	return false
+}
+
+func (s *StatusPage) handleGetStatus(w http.ResponseWriter, address string) {
 	for _, subnet := range(s.Subnets) {
 		if status, ok := subnet.Nodes[address]; ok {
 			w.WriteHeader(http.StatusOK)
@@ -146,7 +175,36 @@ func (s *StatusPage) handleStatus(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-	w.WriteHeader(http.StatusNotFound)
+}
+
+func (s *StatusPage) handlePutStatus(w http.ResponseWriter, r *http.Request,
+	address string) {
+	log.Printf("User is updating reg for %s", address)
+	data, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		log.Printf("Error reading request body for %s", address)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	type RegInfo struct {
+		Name string
+		Email string
+		Note string
+	}
+	var registration RegInfo
+	err = json.Unmarshal(data, &registration)
+	if err != nil {
+		log.Printf("Error unmarshaling request body for %s", address)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	log.Printf("Updating reg info %+v for  %s", registration, address)
+	w.WriteHeader(http.StatusOK)
+}
+
+func (s *StatusPage) handleDeleteStatus(w http.ResponseWriter, address string) {
+	log.Printf("User is deleting reg for %s", address)
+	w.WriteHeader(http.StatusOK)
 }
 
 func formatStatus(status *scanner.NodeStatus) string {
