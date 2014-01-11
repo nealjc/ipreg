@@ -177,6 +177,8 @@ func (s *StatusPage) handleGetStatus(w http.ResponseWriter, address string) {
 	reg, err := database.GetRegistration(address)
 	if err != nil {
 		log.Printf("Failed to lookup registration %s", address)
+		w.WriteHeader(http.StatusInternalServerError);
+		return
 	}
 	for _, subnet := range(s.Subnets) {
 		if status, ok := subnet.Nodes[address]; ok {
@@ -213,14 +215,19 @@ func (s *StatusPage) handlePutStatus(w http.ResponseWriter, r *http.Request,
 		return
 	}
 	log.Printf("Updating reg info %+v for  %s", registration, address)
-	database.SetRegistration(address, registration)
-	w.WriteHeader(http.StatusOK)
+	if database.SetRegistration(address, registration) {
+		w.WriteHeader(http.StatusOK)
+	}
+	w.WriteHeader(http.StatusInternalServerError);
+	
 }
 
 func (s *StatusPage) handleDeleteStatus(w http.ResponseWriter, address string) {
 	log.Printf("User is deleting reg for %s", address)
-	database.DeleteRegistration(address)
-	w.WriteHeader(http.StatusOK)
+	if database.DeleteRegistration(address) {
+		w.WriteHeader(http.StatusOK)
+	}
+	w.WriteHeader(http.StatusInternalServerError);
 }
 
 func formatStatus(status *scanner.NodeStatus) string {
