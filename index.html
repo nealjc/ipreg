@@ -2,8 +2,9 @@
 <html>
   <head>
     <title>ipreg</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <meta name="viewport" content="width=device-width,
+                                   initial-scale=1.0">
+    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap.min.css">
     <script src="http://ajax.aspnetcdn.com/ajax/knockout/knockout-2.2.1.js"></script>
   </head>
   <body>
@@ -37,11 +38,47 @@
     </div>
 
     <div id="main" class="container">
+      <table class="table table-striped">
+        <tr>
+          <td><b>Status</b></td>
+          <td><b>Registration Action</b></td>
+          <td><b>Registered User</b></td>
+          <td><b>Notes</b></td>
+        </tr>
+        <!-- ko foreach: addresses -->
+        <tr>
+        <td>
+          <h4 data-bind="visible: isUp()">
+            <span data-bind="text: address"
+            class="label label-success"></span>
+          </h4>
+          <h4 data-bind="visible: !isUp()">
+            <span data-bind="text: address"
+            class="label label-danger"></span>
+          </h4>
+        </td>
+        <td>
+          <button type="button" class="btn btn-default btn-md" data-bind="visible: isAvailable()">
+            <span class="glyphicon glyphicon-plus"></span> Register
+          </button>
+          <button type="button" class="btn btn-default btn-md" data-bind="visible: !isAvailable()">
+            <span class="glyphicon glyphicon-remove"></span> Unregister
+          </button>
+        </td>
+        <td>
+          <span data-bind="visible: !isAvailable(), text:user"></span>
+        </td>
+        <td>
+          <span data-bind="visible: !isAvailable(), text:note"></span>
+        </td>
+        </tr>
+              <!-- /ko -->
+      </table>
 
     </div>
 
     <script src="https://code.jquery.com/jquery.js"></script>
-    <script src="js/bootstrap.min.js"></script>
+    <script src="//netdna.bootstrapcdn.com/bootstrap/3.0.3/js/bootstrap.min.js"></script>
     <script type="text/javascript">
 
       function SubnetViewModel() {
@@ -70,6 +107,28 @@
         });
       }
       ko.applyBindings(new SubnetViewModel(), $('#subnet-nav')[0]);
+
+      function AddressesViewModel() {
+        self.var = this;
+        self.addresses = ko.observableArray();
+        self.addresses([
+          {
+            address: "192.168.1.1",
+            isUp: ko.observable(true),
+            isAvailable: ko.observable(false),
+            user: "Neal (ncharbonneau@gmail.com)",
+            note: "Used for VM xyz"
+          },
+          {
+            address: "192.168.1.2",
+            isUp: ko.observable(false),
+            isAvailable: ko.observable(true),
+            user: "",
+            note: ""
+          }
+        ]);
+      }
+      ko.applyBindings(new AddressesViewModel(), $('#main')[0]);                        
 
     </script>
   </body>
