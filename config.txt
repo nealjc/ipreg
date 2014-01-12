@@ -1,6 +1,10 @@
 [Parameters]
 ; run the scanner every hour
 TimeBetweenScansInMinutes = 60
+; max IP scans to be running concurrently.
+; main limitation is # of open file descriptors allowed
+; by the OS
+MaxParallelJobs = 50
 
 ; one or more sections for each subnet
 [Subnet "Foo"]

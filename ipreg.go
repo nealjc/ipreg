@@ -33,11 +33,17 @@ func generateAllInSubnet(ipNet *net.IPNet, subnet *scanner.Subnet) {
 	}
 }
 
-func readSubnets() (subnets []*scanner.Subnet, e error) {
+type Params struct {
+	TimeBetweenScans int
+	MaxJobs int
+}
+
+func readSubnets() (subnets []*scanner.Subnet, params Params, e error) {
 	inputFile := "./config.txt"
 	type Config struct {
 		Parameters struct {
 			TimeBetweenScansInMinutes int
+			MaxParallelJobs int
 		}
 		Subnet map[string]*struct {
 			Network string
@@ -46,14 +52,16 @@ func readSubnets() (subnets []*scanner.Subnet, e error) {
 	config := Config{}
 	e = gcfg.ReadFileInto(&config, inputFile)
 	if e != nil {
-		return nil, e
+		return nil, Params{}, e
 	}
 
+	params.MaxJobs = config.Parameters.MaxParallelJobs;
+	params.TimeBetweenScans = config.Parameters.TimeBetweenScansInMinutes;
 	for subnetName, network := range(config.Subnet) {
 		log.Printf("Adding subnet %s %s", subnetName, network.Network)
 		_, ipNet, e := net.ParseCIDR(network.Network)
 		if e != nil {
-			return nil, e
+			return nil, Params{}, e
 		}
 		sub := scanner.NewSubnet(subnetName, ipNet.String())
 		generateAllInSubnet(ipNet, sub)
@@ -64,14 +72,22 @@ func readSubnets() (subnets []*scanner.Subnet, e error) {
 
 func main() {
 	// TODO: require config file input
-	subnets, e := readSubnets()
+	subnets, params, e := readSubnets()
 	if e != nil {
 		log.Fatal(e.Error())
 		return
 	}
-	go scanner.StartScanner(subnets)
+	go scanner.StartScanner(subnets, params.TimeBetweenScans,
+		params.MaxJobs)
 	go web.StartServer(subnets)
 	waitForSignal()
 	web.StopServer()
 	scanner.StopScanner()
 }
+
+
+
+
+
+
+
