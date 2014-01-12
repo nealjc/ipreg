@@ -21,7 +21,7 @@
               <ul class="dropdown-menu">
                 <!-- ko foreach: subnets -->
                 <li><a data-bind="href:'#'">
-                    <span data-bind="text: name"></span>
+                    <span data-bind="text: name, click: $parent.updateSubnet"></span>
                   </a>
                 </li>
                 <!-- /ko -->
@@ -84,36 +84,9 @@
     <script src="//netdna.bootstrapcdn.com/bootstrap/3.0.3/js/bootstrap.min.js"></script>
     <script type="text/javascript">
 
-      function SubnetViewModel() {
-        var self = this;
-        self.subnetsUri = 'http://localhost:8080/subnets';
-        self.subnets = ko.observableArray();
-
-        self.ajax = function(uri, method, data) {
-          var request = {
-            url: uri,
-            type: method,
-            cache: false,
-            dataType: 'json',
-            data: JSON.stringify(data)
-          };
-          return $.ajax(request);
-        }
-
-        self.ajax(self.subnetsUri, 'GET').done(function(data) {
-          for (var i = 0; i < data.length; i++) {
-            self.subnets.push({
-              name : ko.observable(data[i][0]),
-              link: data[i][0]
-            });
-          }
-        });
-      }
-      ko.applyBindings(new SubnetViewModel(), $('#subnet-nav')[0]);
-
-      function AddressesViewModel(subnet) {
+      function AddressesViewModel() {
         self.var = this;
-        self.addressesUri = 'http://localhost:8080/addresses/' + subnet
+        self.addressesUri = 'http://localhost:8080/addresses/'
         self.addresses = ko.observableArray();
         self.ajax = function(uri, method, data) {
           var request = {
@@ -138,21 +111,58 @@
             return true;
           }
           return false;                    
-        }                              
+        }
 
-        self.ajax(self.addressesUri, 'GET').done(function(data) {
+        this.getSubnet = function(subnet) {
+          self.addresses.removeAll()
+          self.ajax(self.addressesUri+subnet, 'GET').done(function(data) {
+            for (var i = 0; i < data.length; i++) {
+              self.addresses.push({
+                address: data[i].Address,
+                isUp: ko.observable(self.checkStatus(data[i].Status)),
+                isAvailable: ko.observable(self.checkAvailable(data[i].Email)),
+                user: data[i].Name + "(" + data[i].Email + ")",
+                note: data[i].Note
+              });
+            }
+          });
+        }
+      }
+
+      var addressesViewModel = new AddressesViewModel
+      ko.applyBindings(addressesViewModel, $('#main')[0]);
+
+      function SubnetViewModel() {
+        var self = this;
+                                
+        self.subnetsUri = 'http://localhost:8080/subnets';
+        self.subnets = ko.observableArray();
+
+        self.updateSubnet = function(subnet) {
+            addressesViewModel.getSubnet(subnet.name())
+        }
+
+        self.ajax = function(uri, method, data) {
+          var request = {
+            url: uri,
+            type: method,
+            cache: false,
+            dataType: 'json',
+            data: JSON.stringify(data)
+          };
+          return $.ajax(request);
+        }
+
+        self.ajax(self.subnetsUri, 'GET').done(function(data) {
           for (var i = 0; i < data.length; i++) {
-            self.addresses.push({
-              address: data[i].Address,
-              isUp: ko.observable(self.checkStatus(data[i].Status)),
-              isAvailable: ko.observable(self.checkAvailable(data[i].Email)),
-              user: data[i].Name + "(" + data[i].Email + ")",
-              note: data[i].Note
+            self.subnets.push({
+              name : ko.observable(data[i][0]),
+              link: data[i][0]
             });
           }
         });
       }
-      ko.applyBindings(new AddressesViewModel('Foo'), $('#main')[0]);
+      ko.applyBindings(new SubnetViewModel(), $('#subnet-nav')[0]);
 
 
     </script>
