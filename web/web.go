@@ -72,6 +72,14 @@ type StatusPage struct {
 	fileHandler http.Handler
 }
 
+type AddressStatus struct {
+	Address string
+	Status string
+	Name string
+	Email string
+	Note string
+}
+
 func (s *StatusPage) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	path := strings.Split(r.URL.Path, "/")
 	log.Printf("Request to %q", path[1])
@@ -122,10 +130,13 @@ func (s *StatusPage) handleAddresses(w http.ResponseWriter, r *http.Request) {
 		return 
 	}
 	
-	subnet := make([]string, len(s.Subnets[subnetIndex].OrderedAddresses),
+	subnet := make([]AddressStatus, len(s.Subnets[subnetIndex].OrderedAddresses),
 		len(s.Subnets[subnetIndex].OrderedAddresses))
+	// TODO: need to get info from DB...
 	for i, address := range(s.Subnets[subnetIndex].OrderedAddresses) {
-		subnet[i] = address
+		subnet[i] = AddressStatus{address,
+			formatStatus(s.Subnets[subnetIndex].Nodes[address]),
+			"","",""}
 	}
 	b, err := json.Marshal(subnet)
 	if err != nil {

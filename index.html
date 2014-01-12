@@ -17,10 +17,13 @@
         <div class="navbar-collapse collapse" id="subnet-nav">
           <ul class="nav navbar-nav">
             <li class="dropdown">
-              <a href="#" class="dropdown-toggle" data-toggle="dropdown">Subnets <b class="caret"></b></a>
+              <a class="dropdown-toggle" data-toggle="dropdown">Subnets <b class="caret"></b></a>
               <ul class="dropdown-menu">
                 <!-- ko foreach: subnets -->
-                <li><a data-bind="attr: {href: link}"><span data-bind="text: name"></span></a></li>
+                <li><a data-bind="href:'#'">
+                    <span data-bind="text: name"></span>
+                  </a>
+                </li>
                 <!-- /ko -->
               </ul>
             </li>
@@ -101,34 +104,56 @@
           for (var i = 0; i < data.length; i++) {
             self.subnets.push({
               name : ko.observable(data[i][0]),
-              link: "#" + data[i][0]
+              link: data[i][0]
             });
           }
         });
       }
       ko.applyBindings(new SubnetViewModel(), $('#subnet-nav')[0]);
 
-      function AddressesViewModel() {
+      function AddressesViewModel(subnet) {
         self.var = this;
+        self.addressesUri = 'http://localhost:8080/addresses/' + subnet
         self.addresses = ko.observableArray();
-        self.addresses([
-          {
-            address: "192.168.1.1",
-            isUp: ko.observable(true),
-            isAvailable: ko.observable(false),
-            user: "Neal (ncharbonneau@gmail.com)",
-            note: "Used for VM xyz"
-          },
-          {
-            address: "192.168.1.2",
-            isUp: ko.observable(false),
-            isAvailable: ko.observable(true),
-            user: "",
-            note: ""
+        self.ajax = function(uri, method, data) {
+          var request = {
+            url: uri,
+            type: method,
+            cache: false,
+            dataType: 'json',
+            data: JSON.stringify(data)
+          };
+          return $.ajax(request);
+        }
+
+        self.checkStatus = function(statusString) {
+          if (statusString == "Up") {
+            return true;
           }
-        ]);
+          return false;                    
+        }
+
+        self.checkAvailable = function(email) {
+          if (email == "") {
+            return true;
+          }
+          return false;                    
+        }                              
+
+        self.ajax(self.addressesUri, 'GET').done(function(data) {
+          for (var i = 0; i < data.length; i++) {
+            self.addresses.push({
+              address: data[i].Address,
+              isUp: ko.observable(self.checkStatus(data[i].Status)),
+              isAvailable: ko.observable(self.checkAvailable(data[i].Email)),
+              user: data[i].Name + "(" + data[i].Email + ")",
+              note: data[i].Note
+            });
+          }
+        });
       }
-      ko.applyBindings(new AddressesViewModel(), $('#main')[0]);                        
+      ko.applyBindings(new AddressesViewModel('Foo'), $('#main')[0]);
+
 
     </script>
   </body>
