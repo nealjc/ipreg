@@ -46,6 +46,8 @@ func NewSubnet(name, network string) *Subnet {
 	return &subnet
 }
 
+// TODO: need to limit max. # of these that can hapepn in parallel,
+// could hit port limits, FD limits, etc.
 func checkHost(address AddrToSubnet) ScanResult {
 	con, err := net.DialTimeout("tcp", net.JoinHostPort(address.Address, "22"),
 		time.Duration(5) * time.Second)

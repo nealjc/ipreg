@@ -40,7 +40,7 @@ func StartServer(status []*scanner.Subnet) {
 	}
 	database = db
 	serverControl = make(chan bool)
-	statusPage := StatusPage{status}
+	statusPage := StatusPage{status, http.FileServer(http.Dir("."))}
 	server := http.Server{
 		Addr: ":8080",
 		Handler: nil,
@@ -69,11 +69,11 @@ func StopServer() {
 
 type StatusPage struct {
 	Subnets []*scanner.Subnet
+	fileHandler http.Handler
 }
 
 func (s *StatusPage) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	path := strings.Split(r.URL.Path, "/")
-	// TODO: index
 	log.Printf("Request to %q", path[1])
 	switch (path[1]) {
 	case "subnets":
@@ -83,7 +83,7 @@ func (s *StatusPage) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	case "status":
 		s.handleStatus(w, r)
 	default:
-		w.WriteHeader(http.StatusBadRequest)
+		s.fileHandler.ServeHTTP(w, r)
 	}
 }
 
