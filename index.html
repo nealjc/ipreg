@@ -61,10 +61,12 @@
           </h4>
         </td>
         <td>
-          <button type="button" class="btn btn-default btn-md" data-bind="visible: isAvailable()">
+          <button type="button" class="btn btn-default btn-md"
+                  data-bind="visible: isAvailable(), click: $parent.doRegister">
             <span class="glyphicon glyphicon-plus"></span> Register
           </button>
-          <button type="button" class="btn btn-default btn-md" data-bind="visible: !isAvailable()">
+          <button type="button" class="btn btn-default btn-md"
+                  data-bind="visible: !isAvailable(), click: $parent.doUnregister">
             <span class="glyphicon glyphicon-remove"></span> Unregister
           </button>
         </td>
@@ -85,8 +87,9 @@
     <script type="text/javascript">
 
       function AddressesViewModel() {
-        self.var = this;
+        var self = this;
         self.addressesUri = 'http://localhost:8080/addresses/'
+        self.statusUri = 'http://localhost:8080/status/'
         self.addresses = ko.observableArray();
         self.ajax = function(uri, method, data) {
           var request = {
@@ -113,6 +116,19 @@
           return false;                    
         }
 
+        self.doRegister = function(address) {
+          alert("Register: TODO")
+        }
+
+        self.doUnregister = function(address) {
+          self.ajax(self.statusUri+address.address,
+          'DELETE').done(function() {
+              self.addresses.get(address.index).Email = ""
+          }).fail(function() {
+              // TODO
+          });
+        }
+
         this.getSubnet = function(subnet) {
           self.addresses.removeAll()
           self.ajax(self.addressesUri+subnet, 'GET').done(function(data) {
@@ -121,8 +137,9 @@
                 address: data[i].Address,
                 isUp: ko.observable(self.checkStatus(data[i].Status)),
                 isAvailable: ko.observable(self.checkAvailable(data[i].Email)),
-                user: data[i].Name + "(" + data[i].Email + ")",
-                note: data[i].Note
+                user: data[i].Name + " (" + data[i].Email + ")",
+                note: data[i].Note,
+                index: i
               });
             }
           });

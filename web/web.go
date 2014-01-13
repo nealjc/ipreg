@@ -132,11 +132,15 @@ func (s *StatusPage) handleAddresses(w http.ResponseWriter, r *http.Request) {
 	
 	subnet := make([]AddressStatus, len(s.Subnets[subnetIndex].OrderedAddresses),
 		len(s.Subnets[subnetIndex].OrderedAddresses))
-	// TODO: need to get info from DB...
 	for i, address := range(s.Subnets[subnetIndex].OrderedAddresses) {
+		reg, err := database.GetRegistration(address)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
 		subnet[i] = AddressStatus{address,
 			formatStatus(s.Subnets[subnetIndex].Nodes[address]),
-			"","",""}
+			reg.Name, reg.Email, reg.Note}
 	}
 	b, err := json.Marshal(subnet)
 	if err != nil {
@@ -228,6 +232,7 @@ func (s *StatusPage) handlePutStatus(w http.ResponseWriter, r *http.Request,
 	log.Printf("Updating reg info %+v for  %s", registration, address)
 	if database.SetRegistration(address, registration) {
 		w.WriteHeader(http.StatusOK)
+		return
 	}
 	w.WriteHeader(http.StatusInternalServerError);
 	
@@ -236,7 +241,10 @@ func (s *StatusPage) handlePutStatus(w http.ResponseWriter, r *http.Request,
 func (s *StatusPage) handleDeleteStatus(w http.ResponseWriter, address string) {
 	log.Printf("User is deleting reg for %s", address)
 	if database.DeleteRegistration(address) {
+		w.Header().Set("Content-Type", "application/json")
+		w.Write([]byte("{}"))
 		w.WriteHeader(http.StatusOK)
+		return
 	}
 	w.WriteHeader(http.StatusInternalServerError);
 }
@@ -253,3 +261,6 @@ func formatStatus(status *scanner.NodeStatus) string {
 		return "Invalid state"
 	}
 }
+
+
+
