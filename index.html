@@ -51,7 +51,7 @@
         <!-- ko foreach: addresses -->
         <tr>
         <td>
-          <h4 data-bind="visible: isUp()">
+          <h4 data-bind="visible: isUp">
             <span data-bind="text: address"
             class="label label-success"></span>
           </h4>
@@ -62,7 +62,7 @@
         </td>
         <td>
           <button type="button" class="btn btn-default btn-md"
-                  data-bind="visible: isAvailable(), click: $parent.doRegister">
+                  data-bind="visible: isAvailable, click: $parent.doRegister">
             <span class="glyphicon glyphicon-plus"></span> Register
           </button>
           <button type="button" class="btn btn-default btn-md"
@@ -123,9 +123,10 @@
         self.doUnregister = function(address) {
           self.ajax(self.statusUri+address.address,
           'DELETE').done(function() {
-              self.addresses.get(address.index).Email = ""
+              self.addresses()[address.index].isAvailable(true)
           }).fail(function() {
               // TODO
+              alert("Failed")
           });
         }
 
@@ -137,8 +138,8 @@
                 address: data[i].Address,
                 isUp: ko.observable(self.checkStatus(data[i].Status)),
                 isAvailable: ko.observable(self.checkAvailable(data[i].Email)),
-                user: data[i].Name + " (" + data[i].Email + ")",
-                note: data[i].Note,
+                user: ko.observable(data[i].Name + " (" + data[i].Email + ")"),
+                note: ko.observable(data[i].Note),
                 index: i
               });
             }
