@@ -113,7 +113,7 @@
             </form>
           </div>
           <div class="modal-footer">
-            <button data-bind="click: setRegister" class="btn btn-primary">Update Registration</button>
+            <button data-bind="click: editAddress" class="btn btn-primary">Update Registration</button>
             <button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
           </div>
         </div>
@@ -157,11 +157,25 @@
         }
 
         self.doRegister = function(address) {
+          editStatusViewModel.setAddress(address);
           $("#edit").modal("show");
         }
+        
+        self.updateAddress = function(address, newAddress) {
+        	var index = self.addresses.indexOf(address);
+        	self.addresses()[index].name(newAddress.name);
+        	self.addresses()[index].email(newAddress.email);
+        	self.addresses()[index].note(newAddress.note);
+        	self.addresses()[index].user(newAddress.name + "(" + newAddress.email + ")");
+        }
 
-        self.setRegister = function(address) {
-			alert("Saving");
+        self.setRegister = function(address, data) {
+			self.ajax(self.statusUri+address.address, 'PUT', data).done(function(res) {
+				self.updateAddress(address, res);
+			}).fail(function() {
+				// TODO
+				alert("Failed");
+			});
         }
 
         self.doUnregister = function(address) {
@@ -232,7 +246,33 @@
         });
       }
       ko.applyBindings(new SubnetViewModel(), $('#subnet-nav')[0]);
+      
+      function EditStatusViewModel() {
+      	var self = this;
+      	
+      	self.name = ko.observable();
+        self.email = ko.observable();
+        self.note = ko.observable();
+ 
+        self.setAddress = function(address) {
+            self.address = address;
+            self.name(address.name());
+            self.email(address.email());
+            self.note(address.note());
+        }
+ 
+        self.editAddress = function() {
+            $('#edit').modal('hide');
+            addressesViewModel.setRegister(self.address, {
+                name: self.name(),
+                email: self.email(),
+                note: self.note()
+            });
+        }
+      }
 
+	var editStatusViewModel = new EditStatusViewModel
+	ko.applyBindings(editStatusViewModel, $('#edit')[0]);
 
     </script>
   </body>

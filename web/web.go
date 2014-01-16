@@ -89,7 +89,9 @@ func (s *StatusPage) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	case "addresses":
 		s.handleAddresses(w, r)
 	case "status":
+		log.Print("Handling status...")
 		s.handleStatus(w, r)
+		log.Print("Done status...")
 	default:
 		s.fileHandler.ServeHTTP(w, r)
 	}
@@ -164,17 +166,22 @@ func (s *StatusPage) handleStatus(w http.ResponseWriter, r *http.Request) {
 	// TODO: index
 	address := strings.Split(r.URL.Path, "/")[2]
 	if !s.validAddress(address) {
+		log.Print("Invalid address")
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}
 	
 	if r.Method == "GET" {
+		log.Print("GET address")
 		s.handleGetStatus(w, address)
 	} else if r.Method == "PUT" {
+		log.Print("PUT address")
 		s.handlePutStatus(w, r, address)
 	} else if r.Method == "DELETE" {
+		log.Print("DELETE address")
 		s.handleDeleteStatus(w, address)
 	} else {
+		log.Print("Bad method for address")
 		w.WriteHeader(http.StatusBadRequest)
 	}
 }
@@ -232,8 +239,11 @@ func (s *StatusPage) handlePutStatus(w http.ResponseWriter, r *http.Request,
 	log.Printf("Updating reg info %+v for  %s", registration, address)
 	if database.SetRegistration(address, registration) {
 		w.WriteHeader(http.StatusOK)
+		w.Write(data)
+		log.Print("Address updated successfuly")
 		return
 	}
+	log.Print("Address update failed")
 	w.WriteHeader(http.StatusInternalServerError);
 	
 }
