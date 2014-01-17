@@ -163,6 +163,7 @@
         
         self.updateAddress = function(address, newAddress) {
         	var index = self.addresses.indexOf(address);
+        	self.addresses()[index].isAvailable(false);
         	self.addresses()[index].name(newAddress.name);
         	self.addresses()[index].email(newAddress.email);
         	self.addresses()[index].note(newAddress.note);
