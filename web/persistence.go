@@ -17,7 +17,8 @@ type DbConnection struct {
 }
 
 func InitializeDB() (*DbConnection, error) {
-	conn, err := sql.Open("sqlite3", "./test.db")
+	log.Print("Opening database")
+	conn, err := sql.Open("sqlite3", "file:ipreg.db?cache=shared&mode=rwc")
 	if err != nil {
 		return nil, err
 	}
@@ -36,18 +37,19 @@ email text, note text);
 
 func (conn *DbConnection) SetRegistration(address string,
 	record RegistrationRecord) bool {
-	rows, err := conn.Query("select * from RegisteredUsers where address = ?", address)
+	rows, err := conn.Query("select * from RegisteredUsers where address = ?;", address)
 	if err != nil {
 		return false
 	}
-	defer rows.Close()
 	if rows.Next() {
+		rows.Close()
 		return doPreparedStatement(conn,
-			"update RegisteredUsers set name=?, email=?, note=? where address=?",
+			"update RegisteredUsers set name=?, email=?, note=? where address=?;",
 			record.Name, record.Email, record.Note, address)
 	} else {
+		rows.Close()
 		return doPreparedStatement(conn,
-			"insert into RegisteredUsers values (?, ?, ?, ?)",
+			"insert into RegisteredUsers values (?, ?, ?, ?);",
 			address, record.Name, record.Email, record.Note)
 	}
 }
@@ -55,12 +57,7 @@ func (conn *DbConnection) SetRegistration(address string,
 func doPreparedStatement(conn *DbConnection, statement string,
 	arguments ...interface{}) bool {
 	
-	stmt, err := conn.Prepare(statement)
-	if err != nil {
-		log.Printf("Failed create statement %q", err.Error())
-		return false
-	}
-	_, err = stmt.Exec(arguments...)
+	_, err := conn.Exec(statement, arguments...)
 	if err != nil {
 		log.Printf("Failed execute statement %q", err.Error())
 		return false
