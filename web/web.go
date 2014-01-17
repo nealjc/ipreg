@@ -252,8 +252,8 @@ func (s *StatusPage) handleDeleteStatus(w http.ResponseWriter, address string) {
 	log.Printf("User is deleting reg for %s", address)
 	if database.DeleteRegistration(address) {
 		w.Header().Set("Content-Type", "application/json")
-		w.Write([]byte("{}"))
 		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("{}"))
 		return
 	}
 	w.WriteHeader(http.StatusInternalServerError);
