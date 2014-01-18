@@ -34,7 +34,7 @@ var serverControl chan bool
 var database *DbConnection
 
 func StartServer(status []*scanner.Subnet) {
-	db, err := InitializeDB()
+	db, err := InitializeDB("./ipreg.db")
 	if err != nil {
 		log.Fatal("Failed to load database")
 	}

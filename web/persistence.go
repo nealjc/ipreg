@@ -2,6 +2,7 @@ package web
 
 import (
 	"log"
+	"fmt"
 	"database/sql"
 	_ "github.com/mattn/go-sqlite3"
 )
@@ -16,9 +17,10 @@ type DbConnection struct {
 	*sql.DB
 }
 
-func InitializeDB() (*DbConnection, error) {
+func InitializeDB(dbName string) (*DbConnection, error) {
 	log.Print("Opening database")
-	conn, err := sql.Open("sqlite3", "file:ipreg.db?cache=shared&mode=rwc")
+	conn, err := sql.Open("sqlite3",
+		fmt.Sprintf("file:%s?cache=shared&mode=rwc", dbName))
 	if err != nil {
 		return nil, err
 	}
@@ -37,6 +39,7 @@ email text, note text);
 
 func (conn *DbConnection) SetRegistration(address string,
 	record RegistrationRecord) bool {
+	// TODO: need a lock here
 	rows, err := conn.Query("select * from RegisteredUsers where address = ?;", address)
 	if err != nil {
 		return false
@@ -57,11 +60,15 @@ func (conn *DbConnection) SetRegistration(address string,
 func doPreparedStatement(conn *DbConnection, statement string,
 	arguments ...interface{}) bool {
 	
-	_, err := conn.Exec(statement, arguments...)
+	result, err := conn.Exec(statement, arguments...)
 	if err != nil {
 		log.Printf("Failed execute statement %q", err.Error())
 		return false
 	}
+	affected, err := result.RowsAffected()
+	if err == nil && affected == 0 {
+		return false
+	} 
 	return true
 }
 
