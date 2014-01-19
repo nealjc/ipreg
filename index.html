@@ -17,7 +17,7 @@
                 <a class="navbar-brand" href="#">ipreg</a>
             </div>
             <div class="navbar-collapse collapse" id="subnet-nav">
-                <ul class="nav navbar-nav">
+                <ul class="nav navbar-nav">         
                     <li class="dropdown">
                         <a class="dropdown-toggle" data-toggle="dropdown">Subnets <b class="caret"></b></a>
                         <ul class="dropdown-menu">
@@ -29,6 +29,13 @@
                             </li>
                             <!-- /ko -->
                         </ul>
+                    </li>
+                </ul>
+                <ul class="nav navbar-nav navbar-right">
+                	 <li>
+                         <button type="button" class="btn btn-default navbar-btn">
+                             <span class="glyphicon glyphicon-refresh"></span> Refresh Status
+                         </button>
                     </li>
                 </ul>
             </div>
@@ -136,6 +143,20 @@
             </div>
         </div>
     </div>
+    
+    <div id="ajax-success" class="modal fade">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h3 class="modal-title">Successful Update</h3>
+                </div>
+                <div id="success-body" class="modal-body">
+                    <p></p>
+                </div>
+            </div>
+        </div>
+    </div>
 
 
     <script src="https://code.jquery.com/jquery.js"></script>
@@ -188,6 +209,8 @@
             self.setRegister = function (address, data) {
                 self.ajax(self.statusUri + address.address, 'PUT', data).done(function (res) {
                     self.updateAddress(address, res);
+                    $("#success-body > p").text("Registration updated for " + address.address);
+					$("#ajax-success").modal("show");
                 }).fail(function () {
 					$("#error-body > p").text("Failed to update registration");
 					$("#ajax-error").modal("show");
@@ -197,18 +220,22 @@
             self.doUnregister = function (address) {
                 self.ajax(self.statusUri + address.address,
                     'DELETE').done(function () {
-                    self.addresses()[address.index].isAvailable(true),
-                    self.addresses()[address.index].user(""),
-                    self.addresses()[address.index].name(""),
-                    self.addresses()[address.index].email(""),
-                    self.addresses()[address.index].note("")
-                }).fail(function () {
+                        self.addresses()[address.index].isAvailable(true);
+                        self.addresses()[address.index].user("");
+                        self.addresses()[address.index].name("");
+                        self.addresses()[address.index].email("");
+                        self.addresses()[address.index].note("");
+                        
+                        $("#success-body > p").text("Registration deleted for " + address.address);
+					    $("#ajax-success").modal("show");
+                    }
+                ).fail(function () {
                     $("#error-body > p").text("Failed to delete registration");
 					$("#ajax-error").modal("show");
                 });
             }
 
-            this.getSubnet = function (subnet) {
+            self.getSubnet = function (subnet) {
                 self.addresses.removeAll();
                 self.ajax(self.addressesUri + subnet, 'GET').done(function (data) {
                     for (var i = 0; i < data.length; i++) {
