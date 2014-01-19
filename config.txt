@@ -5,6 +5,8 @@ TimeBetweenScansInMinutes = 60
 ; main limitation is # of open file descriptors allowed
 ; by the OS
 MaxParallelJobs = 50
+; If this is updated, update index.html as well
+ListenPort = 8080
 
 ; one or more sections for each subnet
 [Subnet "Foo"]

@@ -35,7 +35,7 @@ var server http.Server
 var listener net.Listener
 var database *DbConnection
 
-func Initialize(status []*scanner.Subnet) error {
+func Initialize(status []*scanner.Subnet, listenPort int) error {
 	db, err := InitializeDB("./ipreg.db")
 	if err != nil {
 		return err
@@ -48,7 +48,7 @@ func Initialize(status []*scanner.Subnet) error {
 		Handler: nil,
 	}
 	http.Handle("/", &statusPage)
-	listener, err = net.Listen("tcp", ":8080")
+	listener, err = net.Listen("tcp", fmt.Sprintf(":%d", listenPort))
 	if err != nil {
 		return err
 	}
