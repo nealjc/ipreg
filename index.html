@@ -21,15 +21,15 @@
             <div class="navbar-header">
                 <a class="navbar-brand" href="#">ipreg</a>
             </div>
-            <div class="navbar-collapse collapse" id="subnet-nav">
+            <div class="navbar-collapse collapse">
                 <ul class="nav navbar-nav">         
                     <li class="dropdown">
                         <a class="dropdown-toggle" data-toggle="dropdown">Subnets <b class="caret"></b></a>
-                        <ul class="dropdown-menu">
+                        <ul class="dropdown-menu" id="subnet-nav">
                             <!-- ko foreach: subnets -->
                             <li>
-                                <a data-bind="href:'#'">
-                                    <span data-bind="text: name, click: $parent.updateSubnet"></span>
+                                <a data-bind="href:'#', click: $parent.updateSubnet">
+                                    <span data-bind="text: name"></span>
                                 </a>
                             </li>
                             <!-- /ko -->
@@ -38,9 +38,12 @@
                 </ul>
                 <ul class="nav navbar-nav navbar-right">
                 	 <li>
-                         <button type="button" class="btn btn-default navbar-btn">
+                	 	<div id="refresh-button">
+                         <button type="button" class="btn btn-default navbar-btn" 
+                         	data-bind="click: refreshSubnet">
                              <span class="glyphicon glyphicon-refresh"></span> Refresh Status
                          </button>
+                        </div>
                     </li>
                 </ul>
             </div>
@@ -49,7 +52,7 @@
 
     <div class="container">
         <div class="jumbotron">
-            <h1>IP Address Registration</h1>
+            <h2>IP Address Monitor and Registration</h2>
             <p>Select a subnet from the drop down above to see a listing of IP addresses.</p>
         </div>
     </div>
@@ -57,7 +60,7 @@
     <div id="main" class="container">
         <table class="table table-striped">
             <tr>
-                <td><b>Status</b>
+                <td><b>Connectvity</b>
                 </td>
                 <td><b>Registration Action</b>
                 </td>
@@ -67,32 +70,32 @@
                 </td>
             </tr>
             <!-- ko foreach: addresses -->
-            <tr>
-                <td>
-                    <h4 data-bind="visible: isUp">
-            <span data-bind="text: address"
-            class="label label-success"></span>
-          </h4>
-                    <h4 data-bind="visible: !isUp()">
-            <span data-bind="text: address"
-            class="label label-danger"></span>
-          </h4>
-                </td>
-                <td>
-                    <button type="button" class="btn btn-default btn-md" data-bind="click: $parent.doRegister">
-                        <span class="glyphicon glyphicon-plus"></span> Update Registration
-                    </button>
-                    <button type="button" class="btn btn-default btn-md" data-bind="visible: !isAvailable(), click: $parent.doUnregister">
-                        <span class="glyphicon glyphicon-remove"></span> Unregister
-                    </button>
-                </td>
-                <td>
-                    <span data-bind="visible: !isAvailable(), text:user"></span>
-                </td>
-                <td>
-                    <span data-bind="visible: !isAvailable(), text:note"></span>
-                </td>
-            </tr>
+			<tr>
+				<td>
+					<h4 data-bind="visible: isUp">
+						<span data-bind="text: address"
+						class="label label-success"></span>
+					  </h4>
+					<h4 data-bind="visible: !isUp()">
+						<span data-bind="text: address"
+						class="label label-danger"></span>
+					  </h4>
+				</td>
+				<td>
+					<button type="button" class="btn btn-default btn-md" data-bind="click: $parent.doRegister">
+						<span class="glyphicon glyphicon-plus"></span> Update Registration
+					</button>
+					<button type="button" class="btn btn-default btn-md" data-bind="visible: !isAvailable(), click: $parent.doUnregister">
+						<span class="glyphicon glyphicon-remove"></span> Unregister
+					</button>
+				</td>
+				<td>
+					<span data-bind="visible: !isAvailable(), text:user"></span>
+				</td>
+				<td>
+					<span data-bind="visible: !isAvailable(), text:note"></span>
+				</td>
+			</tr>
             <!-- /ko -->
         </table>
 
@@ -191,6 +194,8 @@
 			 });
 		});
 
+		var currentSubnet = "";
+
         function AddressesViewModel() {
             var self = this;
             self.addressesUri = 'http://localhost:8080/addresses/';
@@ -268,6 +273,7 @@
 
             self.getSubnet = function (subnet) {
                 self.addresses.removeAll();
+                currentSubnet = subnet;
                 self.ajax(self.addressesUri + subnet, 'GET').done(function (data) {
                     for (var i = 0; i < data.length; i++) {
                         self.addresses.push({
@@ -287,7 +293,6 @@
                 });
             }
         }
-
 
         var addressesViewModel = new AddressesViewModel;
         ko.applyBindings(addressesViewModel, $('#main')[0]);
@@ -325,8 +330,8 @@
 					$("#ajax-error").modal("show");
                 });
         }
-        ko.applyBindings(new SubnetViewModel(), $('#subnet-nav')[0]);
 
+        ko.applyBindings(new SubnetViewModel(), $('#subnet-nav')[0]);
         function EditStatusViewModel() {
             var self = this;
 
@@ -356,6 +361,21 @@
 
         var editStatusViewModel = new EditStatusViewModel;
         ko.applyBindings(editStatusViewModel, $('#edit')[0]);
+        
+        
+        function RefreshStatusViewModel() {
+        	var self = this;
+        	
+        	self.refreshSubnet = function() {
+        		if (currentSubnet == "") {
+					return;
+        		}
+        		addressesViewModel.getSubnet(currentSubnet);
+        	}
+        }
+        
+        ko.applyBindings(new RefreshStatusViewModel(), $('#refresh-button')[0]);
+
     </script>
 </body>
 
