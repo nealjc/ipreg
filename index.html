@@ -122,7 +122,20 @@
             </div>
         </div>
     </div>
-
+    
+    <div id="ajax-error" class="modal fade">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h3 class="modal-title">Error</h3>
+                </div>
+                <div id="error-body" class="modal-body">
+                    <p></p>
+                </div>
+            </div>
+        </div>
+    </div>
 
 
     <script src="https://code.jquery.com/jquery.js"></script>
@@ -176,8 +189,8 @@
                 self.ajax(self.statusUri + address.address, 'PUT', data).done(function (res) {
                     self.updateAddress(address, res);
                 }).fail(function () {
-                    // TODO
-                    alert("Failed");
+					$("#error-body > p").text("Failed to update registration");
+					$("#ajax-error").modal("show");
                 });
             }
 
@@ -190,8 +203,8 @@
                     self.addresses()[address.index].email(""),
                     self.addresses()[address.index].note("")
                 }).fail(function () {
-                    // TODO
-                    alert("Failed");
+                    $("#error-body > p").text("Failed to delete registration");
+					$("#ajax-error").modal("show");
                 });
             }
 
@@ -210,6 +223,9 @@
                             index: i
                         });
                     }
+                }).fail(function () {
+                    $("#error-body > p").text("Failed to get subnet information");
+					$("#ajax-error").modal("show");
                 });
             }
         }
@@ -246,7 +262,10 @@
                         link: data[i][0]
                     });
                 }
-            });
+            }).fail(function () {
+                    $("#error-body > p").text("Failed to get available subnets");
+					$("#ajax-error").modal("show");
+                });
         }
         ko.applyBindings(new SubnetViewModel(), $('#subnet-nav')[0]);
 
