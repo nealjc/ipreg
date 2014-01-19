@@ -23,18 +23,16 @@ func generateAllInSubnet(ipNet *net.IPNet, subnet *scanner.Subnet) {
 }
 
 type Params struct {
-	TimeBetweenScans int
-	MaxJobs int
+	TimeBetweenScansInMinutes int
+	MaxParallelJobs int
 	ListenPort int
+	DatabaseDir string
+	HtmlDir string
 }
 
 func ParseConfig(inputFile string) (subnets []*scanner.Subnet, params Params, e error) {
 	type Config struct {
-		Parameters struct {
-			TimeBetweenScansInMinutes int
-			MaxParallelJobs int
-			ListenPort int
-		}
+		Parameters Params
 		Subnet map[string]*struct {
 			Network string
 		}
@@ -45,9 +43,7 @@ func ParseConfig(inputFile string) (subnets []*scanner.Subnet, params Params, e 
 		return nil, Params{}, e
 	}
 
-	params.MaxJobs = config.Parameters.MaxParallelJobs;
-	params.TimeBetweenScans = config.Parameters.TimeBetweenScansInMinutes;
-	params.ListenPort = config.Parameters.ListenPort
+	params = config.Parameters
 	for subnetName, network := range(config.Subnet) {
 		log.Printf("Adding subnet %s %s", subnetName, network.Network)
 		_, ipNet, e := net.ParseCIDR(network.Network)

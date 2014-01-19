@@ -8,10 +8,10 @@ MaxParallelJobs = 50
 ; If this is updated, update index.html as well
 ListenPort = 8080
 ; ipreg will need write permission to this directory
-Database = /var/
+DatabaseDir = /var/ipreg/
 ; ipreg will need read permission for this directory.
 ; The directory should contain the index.html file
-Html = /var/
+HtmlDir = /var/ipreg/
 
 ; one or more sections for each subnet
 [Subnet "Foo"]

@@ -25,6 +25,7 @@ import(
 	"fmt"
 	"io/ioutil"
 	"github.com/nealjc/ipreg/scanner"
+	"github.com/nealjc/ipreg/config"
 	"encoding/json"
 	"log"
 	"strings"
@@ -35,20 +36,20 @@ var server http.Server
 var listener net.Listener
 var database *DbConnection
 
-func Initialize(status []*scanner.Subnet, listenPort int) error {
-	db, err := InitializeDB("./ipreg.db")
+func Initialize(status []*scanner.Subnet, params config.Params) error {
+	db, err := InitializeDB(params.DatabaseDir + "ipreg.db")
 	if err != nil {
 		return err
 	}
 	database = db
 	serverControl = make(chan bool)
-	statusPage := StatusPage{status, http.FileServer(http.Dir("."))}
+	statusPage := StatusPage{status, http.FileServer(http.Dir(params.HtmlDir))}
 	server = http.Server{
-		Addr: ":8080",
+		Addr: fmt.Sprintf(":%d", params.ListenPort),
 		Handler: nil,
 	}
 	http.Handle("/", &statusPage)
-	listener, err = net.Listen("tcp", fmt.Sprintf(":%d", listenPort))
+	listener, err = net.Listen("tcp", fmt.Sprintf(":%d", params.ListenPort))
 	if err != nil {
 		return err
 	}

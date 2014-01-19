@@ -15,9 +15,9 @@ func main() {
 		log.Fatal(e.Error())
 		return
 	}
-	go scanner.StartScanner(subnets, params.TimeBetweenScans,
-		params.MaxJobs)
-	if err := web.Initialize(subnets, params.ListenPort); err != nil {
+	go scanner.StartScanner(subnets, params.TimeBetweenScansInMinutes,
+		params.MaxParallelJobs)
+	if err := web.Initialize(subnets, params); err != nil {
 		log.Fatal(err)
 	}
 	go web.StartServer()
