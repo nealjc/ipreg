@@ -49,7 +49,9 @@ Next, edit the index.html file for the following:
 
 ## Ubuntu
 The scripts/ directory contains a script that can be used with Ubuntu
-upstart. Move it to /etc/init.d/ipreg and ipreg can started/stopped
-with service ipreg start/stop.
+upstart. Move it to /etc/init/ directory and ipreg can be
+started/stopped with the start and stop commands in Ubuntu, e.g., sudo
+start ipreg.
+
 
 
