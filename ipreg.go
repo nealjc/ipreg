@@ -38,8 +38,7 @@ type Params struct {
 	MaxJobs int
 }
 
-func readSubnets() (subnets []*scanner.Subnet, params Params, e error) {
-	inputFile := "./config.txt"
+func ParseConfig(inputFile string) (subnets []*scanner.Subnet, params Params, e error) {
 	type Config struct {
 		Parameters struct {
 			TimeBetweenScansInMinutes int
@@ -72,18 +71,29 @@ func readSubnets() (subnets []*scanner.Subnet, params Params, e error) {
 
 func main() {
 	// TODO: require config file input
-	subnets, params, e := readSubnets()
+	subnets, params, e := ParseConfig("config.txt")
 	if e != nil {
 		log.Fatal(e.Error())
 		return
 	}
 	go scanner.StartScanner(subnets, params.TimeBetweenScans,
 		params.MaxJobs)
-	go web.StartServer(subnets)
+	if err := web.Initialize(subnets); err != nil {
+		log.Fatal(err)
+	}
+	go web.StartServer()
 	waitForSignal()
 	web.StopServer()
 	scanner.StopScanner()
 }
+
+
+
+
+
+
+
+
 
 
 

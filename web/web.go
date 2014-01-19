@@ -31,31 +31,36 @@ import(
 )
 
 var serverControl chan bool
+var server http.Server
+var listener net.Listener
 var database *DbConnection
 
-func StartServer(status []*scanner.Subnet) {
+func Initialize(status []*scanner.Subnet) error {
 	db, err := InitializeDB("./ipreg.db")
 	if err != nil {
-		log.Fatal("Failed to load database")
+		return err
 	}
 	database = db
 	serverControl = make(chan bool)
 	statusPage := StatusPage{status, http.FileServer(http.Dir("."))}
-	server := http.Server{
+	server = http.Server{
 		Addr: ":8080",
 		Handler: nil,
 	}
 	http.Handle("/", &statusPage)
-	l, e := net.Listen("tcp", ":8080")
-	if e != nil {
-		log.Fatal("Failed to start server")
-		return
+	listener, err = net.Listen("tcp", ":8080")
+	if err != nil {
+		return err
 	}
-	go server.Serve(l)
+	return nil
+}
+
+func StartServer() {
+	go server.Serve(listener)
 	log.Print("HTTP Server started")
 	select {
 	case <- serverControl:
-		l.Close()
+		listener.Close()
 	}
 	serverControl <- true
 	log.Print("HTTP Server stopped")
