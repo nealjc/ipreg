@@ -10,8 +10,7 @@ import(
 )
 
 func main() {
-	// TODO: require config file input
-	subnets, params, e := config.ParseConfig("config.txt")
+	subnets, params, e := config.ParseConfig("/etc/ipreg.conf")
 	if e != nil {
 		log.Fatal(e.Error())
 		return

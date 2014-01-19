@@ -7,6 +7,11 @@ TimeBetweenScansInMinutes = 60
 MaxParallelJobs = 50
 ; If this is updated, update index.html as well
 ListenPort = 8080
+; ipreg will need write permission to this directory
+Database = /var/
+; ipreg will need read permission for this directory.
+; The directory should contain the index.html file
+Html = /var/
 
 ; one or more sections for each subnet
 [Subnet "Foo"]

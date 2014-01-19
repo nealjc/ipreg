@@ -60,7 +60,7 @@
     <div id="main" class="container">
         <table class="table table-striped">
             <tr>
-                <td><b>Connectvity</b>
+                <td><b>Host Status</b>
                 </td>
                 <td><b>Registration Action</b>
                 </td>
@@ -195,11 +195,13 @@
 		});
 
 		var currentSubnet = "";
+		var ipregServer = "localhost";
+		var ipregServerPort = "8080";
 
         function AddressesViewModel() {
             var self = this;
-            self.addressesUri = 'http://localhost:8080/addresses/';
-            self.statusUri = 'http://localhost:8080/status/';
+            self.addressesUri = 'http://' + ipregServer + ':' + ipregServerPort + '/addresses/';
+            self.statusUri = 'http://' + ipregServer + ':' + ipregServerPort + '/status/';
             self.addresses = ko.observableArray();
             self.ajax = function (uri, method, data) {
                 var request = {
@@ -300,7 +302,7 @@
         function SubnetViewModel() {
             var self = this;
 
-            self.subnetsUri = 'http://localhost:8080/subnets';
+            self.subnetsUri = 'http://' + ipregServer + ':' + ipregServerPort + '/subnets';
             self.subnets = ko.observableArray();
 
             self.updateSubnet = function (subnet) {
