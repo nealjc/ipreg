@@ -28,6 +28,9 @@ func TestGetBadStatus(t *testing.T) {
 func TestPutGoodStatus(t *testing.T) {
 }
 
+func TestPutEmptyEmailStatus(t *testing.T) {
+}
+
 func TestPutBadStatus(t *testing.T) {
 }
 
@@ -55,5 +58,5 @@ func TestConcurrentAccess(t *testing.T) {
 
 
 func initServer(t *testing.T) {
-
+	
 }

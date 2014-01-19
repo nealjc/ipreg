@@ -241,6 +241,11 @@ func (s *StatusPage) handlePutStatus(w http.ResponseWriter, r *http.Request,
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
+	if registration.Email == "" {
+		log.Printf("User submitted request with empty email")
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
 	log.Printf("Updating reg info %+v for  %s", registration, address)
 	if database.SetRegistration(address, registration) {
 		w.WriteHeader(http.StatusOK)

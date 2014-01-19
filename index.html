@@ -7,6 +7,11 @@
                                    initial-scale=1.0">
     <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap.min.css">
     <script src="http://ajax.aspnetcdn.com/ajax/knockout/knockout-2.2.1.js"></script>
+    <style>
+    .error input {
+		border: 2px solid red;
+	}
+	</style>
 </head>
 
 <body>
@@ -93,6 +98,7 @@
 
     </div>
 
+	<form id="edit-form">
     <div id="edit" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="editRegLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -105,19 +111,19 @@
                         <div class="control-group">
                             <label class="control-label" for="inputUser">User</label>
                             <div class="controls">
-                                <input data-bind="value: name" type="text" id="inputUser" placeholder="Name" style="width: 150px;">
+                                <input data-bind="value: name" type="text" name="inputUser" id="inputUser" placeholder="Name" style="width: 150px;">
                             </div>
                         </div>
                         <div class="control-group">
                             <label class="control-label" for="inputEmail">Email</label>
                             <div class="controls">
-                                <input data-bind="value: email" type="text" id="inputEmail" placeholder="Email" style="width: 300px;">
+                                <input data-bind="value: email" type="text" name="inputEmail" id="inputEmail" placeholder="Email" style="width: 300px;">
                             </div>
                         </div>
                         <div class="control-group">
                             <label class="control-label" for="inputNote">Note</label>
                             <div class="controls">
-                                <input data-bind="value: note" type="text" id="inputNote" placeholder="Notes" style="width: 300px;">
+                                <input data-bind="value: note" type="text" name="inputNote"  id="inputNote" placeholder="Notes" style="width: 300px;">
                             </div>
                         </div>
                     </form>
@@ -129,6 +135,7 @@
             </div>
         </div>
     </div>
+    </form>
     
     <div id="ajax-error" class="modal fade">
         <div class="modal-dialog">
@@ -160,8 +167,30 @@
 
 
     <script src="https://code.jquery.com/jquery.js"></script>
+    <script src="http://ajax.aspnetcdn.com/ajax/jquery.validate/1.11.1/jquery.validate.min.js"></script>
     <script src="//netdna.bootstrapcdn.com/bootstrap/3.0.3/js/bootstrap.min.js"></script>
     <script type="text/javascript">
+		 $(document).ready(function () {
+			 $('#edit-form').validate({
+				 rules: {
+					 inputUser: {
+						 required: true
+					 },
+					 inputEmail: {
+						 required: true,
+						 email: true
+					 },
+				 },
+				 highlight: function (element) {
+					 $(element).closest('.control-group').removeClass('success').addClass('error');
+				 },
+				 success: function (element) {
+					 element.addClass('valid')
+						 .closest('.control-group').removeClass('error').addClass('success');
+				 }
+			 });
+		});
+
         function AddressesViewModel() {
             var self = this;
             self.addressesUri = 'http://localhost:8080/addresses/';
@@ -194,6 +223,8 @@
 
             self.doRegister = function (address) {
                 editStatusViewModel.setAddress(address);
+                // force a reset
+                $('#edit-form').valid();
                 $("#edit").modal("show");
             }
 
@@ -311,6 +342,9 @@
             }
 
             self.editAddress = function () {
+             	if (!$('#edit-form').valid()) {
+             		return;
+             	}
                 $('#edit').modal('hide');
                 addressesViewModel.setRegister(self.address, {
                     name: self.name(),
