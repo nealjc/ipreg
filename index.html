@@ -1,280 +1,282 @@
 <!DOCTYPE html>
 <html>
-  <head>
+
+<head>
     <title>ipreg</title>
     <meta name="viewport" content="width=device-width,
                                    initial-scale=1.0">
     <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap.min.css">
     <script src="http://ajax.aspnetcdn.com/ajax/knockout/knockout-2.2.1.js"></script>
-  </head>
-  <body>
+</head>
+
+<body>
 
     <div class="navbar navbar-default navbar-fixed-top" role="navigation">
-      <div class="container">
-        <div class="navbar-header">
-          <a class="navbar-brand" href="#">ipreg</a>
+        <div class="container">
+            <div class="navbar-header">
+                <a class="navbar-brand" href="#">ipreg</a>
+            </div>
+            <div class="navbar-collapse collapse" id="subnet-nav">
+                <ul class="nav navbar-nav">
+                    <li class="dropdown">
+                        <a class="dropdown-toggle" data-toggle="dropdown">Subnets <b class="caret"></b></a>
+                        <ul class="dropdown-menu">
+                            <!-- ko foreach: subnets -->
+                            <li>
+                                <a data-bind="href:'#'">
+                                    <span data-bind="text: name, click: $parent.updateSubnet"></span>
+                                </a>
+                            </li>
+                            <!-- /ko -->
+                        </ul>
+                    </li>
+                </ul>
+            </div>
         </div>
-        <div class="navbar-collapse collapse" id="subnet-nav">
-          <ul class="nav navbar-nav">
-            <li class="dropdown">
-              <a class="dropdown-toggle" data-toggle="dropdown">Subnets <b class="caret"></b></a>
-              <ul class="dropdown-menu">
-                <!-- ko foreach: subnets -->
-                <li><a data-bind="href:'#'">
-                    <span data-bind="text: name, click: $parent.updateSubnet"></span>
-                  </a>
-                </li>
-                <!-- /ko -->
-              </ul>
-            </li>
-          </ul>
-        </div>
-      </div>
     </div>
-      
+
     <div class="container">
-      <div class="jumbotron">
-        <h1>IP Address Registration</h1>
-        <p>Select a subnet from the drop down above to see a listing
-        of IP addresses. </p>
-      </div>
+        <div class="jumbotron">
+            <h1>IP Address Registration</h1>
+            <p>Select a subnet from the drop down above to see a listing of IP addresses.</p>
+        </div>
     </div>
 
     <div id="main" class="container">
-      <table class="table table-striped">
-        <tr>
-          <td><b>Status</b></td>
-          <td><b>Registration Action</b></td>
-          <td><b>Registered User</b></td>
-          <td><b>Notes</b></td>
-        </tr>
-        <!-- ko foreach: addresses -->
-        <tr>
-        <td>
-          <h4 data-bind="visible: isUp">
+        <table class="table table-striped">
+            <tr>
+                <td><b>Status</b>
+                </td>
+                <td><b>Registration Action</b>
+                </td>
+                <td><b>Registered User</b>
+                </td>
+                <td><b>Notes</b>
+                </td>
+            </tr>
+            <!-- ko foreach: addresses -->
+            <tr>
+                <td>
+                    <h4 data-bind="visible: isUp">
             <span data-bind="text: address"
             class="label label-success"></span>
           </h4>
-          <h4 data-bind="visible: !isUp()">
+                    <h4 data-bind="visible: !isUp()">
             <span data-bind="text: address"
             class="label label-danger"></span>
           </h4>
-        </td>
-        <td>
-          <button type="button" class="btn btn-default btn-md"
-                  data-bind="click: $parent.doRegister">
-            <span class="glyphicon glyphicon-plus"></span> Update Registration
-          </button>
-          <button type="button" class="btn btn-default btn-md"
-                  data-bind="visible: !isAvailable(), click: $parent.doUnregister">
-            <span class="glyphicon glyphicon-remove"></span> Unregister
-          </button>
-        </td>
-        <td>
-          <span data-bind="visible: !isAvailable(), text:user"></span>
-        </td>
-        <td>
-          <span data-bind="visible: !isAvailable(), text:note"></span>
-        </td>
-        </tr>
-              <!-- /ko -->
-      </table>
+                </td>
+                <td>
+                    <button type="button" class="btn btn-default btn-md" data-bind="click: $parent.doRegister">
+                        <span class="glyphicon glyphicon-plus"></span> Update Registration
+                    </button>
+                    <button type="button" class="btn btn-default btn-md" data-bind="visible: !isAvailable(), click: $parent.doUnregister">
+                        <span class="glyphicon glyphicon-remove"></span> Unregister
+                    </button>
+                </td>
+                <td>
+                    <span data-bind="visible: !isAvailable(), text:user"></span>
+                </td>
+                <td>
+                    <span data-bind="visible: !isAvailable(), text:note"></span>
+                </td>
+            </tr>
+            <!-- /ko -->
+        </table>
 
     </div>
 
-    <div id="edit" class="modal fade" tabindex="-1" role="dialog"
-         aria-labelledby="editRegLabel" aria-hidden="true">
-      <div class="modal-dialog">
-        <div class="modal-content">
-          <div class="modal-header">
-            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-            <h3 class="modal-title" id="editRegLabel">Edit Registration</h3>
-          </div>
-          <div class="modal-body">
-            <form class="form-horizontal">
-              <div class="control-group">
-                <label class="control-label" for="inputUser">User</label>
-                <div class="controls">
-                  <input data-bind="value: name" type="text" id="inputUser" placeholder="Name" style="width: 150px;">
+    <div id="edit" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="editRegLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h3 class="modal-title" id="editRegLabel">Edit Registration</h3>
                 </div>
-              </div>
-              <div class="control-group">
-                <label class="control-label" for="inputEmail">Email</label>
-                <div class="controls">
-                  <input data-bind="value: email" type="text" id="inputEmail" placeholder="Email" style="width: 300px;">
+                <div class="modal-body">
+                    <form class="form-horizontal">
+                        <div class="control-group">
+                            <label class="control-label" for="inputUser">User</label>
+                            <div class="controls">
+                                <input data-bind="value: name" type="text" id="inputUser" placeholder="Name" style="width: 150px;">
+                            </div>
+                        </div>
+                        <div class="control-group">
+                            <label class="control-label" for="inputEmail">Email</label>
+                            <div class="controls">
+                                <input data-bind="value: email" type="text" id="inputEmail" placeholder="Email" style="width: 300px;">
+                            </div>
+                        </div>
+                        <div class="control-group">
+                            <label class="control-label" for="inputNote">Note</label>
+                            <div class="controls">
+                                <input data-bind="value: note" type="text" id="inputNote" placeholder="Notes" style="width: 300px;">
+                            </div>
+                        </div>
+                    </form>
                 </div>
-              </div>
-              <div class="control-group">
-                <label class="control-label" for="inputNote">Note</label>
-                <div class="controls">
-                  <input data-bind="value: note" type="text" id="inputNote" placeholder="Notes" style="width: 300px;">
+                <div class="modal-footer">
+                    <button data-bind="click: editAddress" class="btn btn-primary">Update Registration</button>
+                    <button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
                 </div>
-              </div>
-            </form>
-          </div>
-          <div class="modal-footer">
-            <button data-bind="click: editAddress" class="btn btn-primary">Update Registration</button>
-            <button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
-          </div>
+            </div>
         </div>
-      </div>
     </div>
 
-     
+
 
     <script src="https://code.jquery.com/jquery.js"></script>
     <script src="//netdna.bootstrapcdn.com/bootstrap/3.0.3/js/bootstrap.min.js"></script>
     <script type="text/javascript">
-
-      function AddressesViewModel() {
-        var self = this;
-        self.addressesUri = 'http://localhost:8080/addresses/'
-        self.statusUri = 'http://localhost:8080/status/'
-        self.addresses = ko.observableArray();
-        self.ajax = function(uri, method, data) {
-          var request = {
-            url: uri,
-            type: method,
-            cache: false,
-            dataType: 'json',
-            data: JSON.stringify(data)
-          };
-          return $.ajax(request);
-        }
-
-        self.checkStatus = function(statusString) {
-          if (statusString == "Up") {
-            return true;
-          }
-          return false;                    
-        }
-
-        self.checkAvailable = function(email) {
-          if (email == "") {
-            return true;
-          }
-          return false;                    
-        }
-
-        self.doRegister = function(address) {
-          editStatusViewModel.setAddress(address);
-          $("#edit").modal("show");
-        }
-        
-        self.updateAddress = function(address, newAddress) {
-        	var index = self.addresses.indexOf(address);
-        	self.addresses()[index].isAvailable(false);
-        	self.addresses()[index].name(newAddress.name);
-        	self.addresses()[index].email(newAddress.email);
-        	self.addresses()[index].note(newAddress.note);
-        	self.addresses()[index].user(newAddress.name + "(" + newAddress.email + ")");
-        }
-
-        self.setRegister = function(address, data) {
-			self.ajax(self.statusUri+address.address, 'PUT', data).done(function(res) {
-				self.updateAddress(address, res);
-			}).fail(function() {
-				// TODO
-				alert("Failed");
-			});
-        }
-
-        self.doUnregister = function(address) {
-          self.ajax(self.statusUri+address.address,
-          'DELETE').done(function() {
-              self.addresses()[address.index].isAvailable(true),
-              self.addresses()[address.index].user(""),
-              self.addresses()[address.index].name(""),
-              self.addresses()[address.index].email(""),
-              self.addresses()[address.index].note("")
-          }).fail(function() {
-              // TODO
-              alert("Failed")
-          });
-        }
-
-        this.getSubnet = function(subnet) {
-          self.addresses.removeAll()
-          self.ajax(self.addressesUri+subnet, 'GET').done(function(data) {
-            for (var i = 0; i < data.length; i++) {
-              self.addresses.push({
-                address: data[i].Address,
-                isUp: ko.observable(self.checkStatus(data[i].Status)),
-                isAvailable: ko.observable(self.checkAvailable(data[i].Email)),
-                user: ko.observable(data[i].Name + " (" + data[i].Email + ")"),
-                name: ko.observable(data[i].Name),
-                email: ko.observable(data[i].Email),
-                note: ko.observable(data[i].Note),
-                index: i
-              });
+        function AddressesViewModel() {
+            var self = this;
+            self.addressesUri = 'http://localhost:8080/addresses/';
+            self.statusUri = 'http://localhost:8080/status/';
+            self.addresses = ko.observableArray();
+            self.ajax = function (uri, method, data) {
+                var request = {
+                    url: uri,
+                    type: method,
+                    cache: false,
+                    dataType: 'json',
+                    data: JSON.stringify(data)
+                };
+                return $.ajax(request);
             }
-          });
+
+            self.checkStatus = function (statusString) {
+                if (statusString == "Up") {
+                    return true;
+                }
+                return false;
+            }
+
+            self.checkAvailable = function (email) {
+                if (email == "") {
+                    return true;
+                }
+                return false;
+            }
+
+            self.doRegister = function (address) {
+                editStatusViewModel.setAddress(address);
+                $("#edit").modal("show");
+            }
+
+            self.updateAddress = function (address, newAddress) {
+                var index = self.addresses.indexOf(address);
+                self.addresses()[index].isAvailable(false);
+                self.addresses()[index].name(newAddress.name);
+                self.addresses()[index].email(newAddress.email);
+                self.addresses()[index].note(newAddress.note);
+                self.addresses()[index].user(newAddress.name + "(" + newAddress.email + ")");
+            }
+
+            self.setRegister = function (address, data) {
+                self.ajax(self.statusUri + address.address, 'PUT', data).done(function (res) {
+                    self.updateAddress(address, res);
+                }).fail(function () {
+                    // TODO
+                    alert("Failed");
+                });
+            }
+
+            self.doUnregister = function (address) {
+                self.ajax(self.statusUri + address.address,
+                    'DELETE').done(function () {
+                    self.addresses()[address.index].isAvailable(true),
+                    self.addresses()[address.index].user(""),
+                    self.addresses()[address.index].name(""),
+                    self.addresses()[address.index].email(""),
+                    self.addresses()[address.index].note("")
+                }).fail(function () {
+                    // TODO
+                    alert("Failed");
+                });
+            }
+
+            this.getSubnet = function (subnet) {
+                self.addresses.removeAll();
+                self.ajax(self.addressesUri + subnet, 'GET').done(function (data) {
+                    for (var i = 0; i < data.length; i++) {
+                        self.addresses.push({
+                            address: data[i].Address,
+                            isUp: ko.observable(self.checkStatus(data[i].Status)),
+                            isAvailable: ko.observable(self.checkAvailable(data[i].Email)),
+                            user: ko.observable(data[i].Name + " (" + data[i].Email + ")"),
+                            name: ko.observable(data[i].Name),
+                            email: ko.observable(data[i].Email),
+                            note: ko.observable(data[i].Note),
+                            index: i
+                        });
+                    }
+                });
+            }
         }
-      }
-      
-   
-      var addressesViewModel = new AddressesViewModel
-      ko.applyBindings(addressesViewModel, $('#main')[0]);
 
-      function SubnetViewModel() {
-        var self = this;
-                                
-        self.subnetsUri = 'http://localhost:8080/subnets';
-        self.subnets = ko.observableArray();
 
-        self.updateSubnet = function(subnet) {
-            addressesViewModel.getSubnet(subnet.name())
-        }
+        var addressesViewModel = new AddressesViewModel;
+        ko.applyBindings(addressesViewModel, $('#main')[0]);
 
-        self.ajax = function(uri, method, data) {
-          var request = {
-            url: uri,
-            type: method,
-            cache: false,
-            dataType: 'json',
-            data: JSON.stringify(data)
-          };
-          return $.ajax(request);
-        }
+        function SubnetViewModel() {
+            var self = this;
 
-        self.ajax(self.subnetsUri, 'GET').done(function(data) {
-          for (var i = 0; i < data.length; i++) {
-            self.subnets.push({
-              name : ko.observable(data[i][0]),
-              link: data[i][0]
+            self.subnetsUri = 'http://localhost:8080/subnets';
+            self.subnets = ko.observableArray();
+
+            self.updateSubnet = function (subnet) {
+                addressesViewModel.getSubnet(subnet.name());
+            }
+
+            self.ajax = function (uri, method, data) {
+                var request = {
+                    url: uri,
+                    type: method,
+                    cache: false,
+                    dataType: 'json',
+                    data: JSON.stringify(data)
+                };
+                return $.ajax(request);
+            }
+
+            self.ajax(self.subnetsUri, 'GET').done(function (data) {
+                for (var i = 0; i < data.length; i++) {
+                    self.subnets.push({
+                        name: ko.observable(data[i][0]),
+                        link: data[i][0]
+                    });
+                }
             });
-          }
-        });
-      }
-      ko.applyBindings(new SubnetViewModel(), $('#subnet-nav')[0]);
-      
-      function EditStatusViewModel() {
-      	var self = this;
-      	
-      	self.name = ko.observable();
-        self.email = ko.observable();
-        self.note = ko.observable();
- 
-        self.setAddress = function(address) {
-            self.address = address;
-            self.name(address.name());
-            self.email(address.email());
-            self.note(address.note());
         }
- 
-        self.editAddress = function() {
-            $('#edit').modal('hide');
-            addressesViewModel.setRegister(self.address, {
-                name: self.name(),
-                email: self.email(),
-                note: self.note()
-            });
+        ko.applyBindings(new SubnetViewModel(), $('#subnet-nav')[0]);
+
+        function EditStatusViewModel() {
+            var self = this;
+
+            self.name = ko.observable();
+            self.email = ko.observable();
+            self.note = ko.observable();
+
+            self.setAddress = function (address) {
+                self.address = address;
+                self.name(address.name());
+                self.email(address.email());
+                self.note(address.note());
+            }
+
+            self.editAddress = function () {
+                $('#edit').modal('hide');
+                addressesViewModel.setRegister(self.address, {
+                    name: self.name(),
+                    email: self.email(),
+                    note: self.note()
+                });
+            }
         }
-      }
 
-	var editStatusViewModel = new EditStatusViewModel
-	ko.applyBindings(editStatusViewModel, $('#edit')[0]);
-
+        var editStatusViewModel = new EditStatusViewModel;
+        ko.applyBindings(editStatusViewModel, $('#edit')[0]);
     </script>
-  </body>
+</body>
+
 </html>
