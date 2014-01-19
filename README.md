@@ -7,12 +7,12 @@ This is useful in small research envrionments where
 subnets are shared and IP address usage must be de-conflicted
 by claiming which addresses are in use.
 
-##Installation
+## Installation
 
-## Pre-requisites
+### Pre-requisites
 * ipreg requires sqlite3 libraries.
 
-## Building from source
+### Building from source
 
 * Install Go 1.2+
 * Set $GOPATH. This will be where ipreg will be downloaded to and
@@ -47,7 +47,7 @@ Next, edit the index.html file for the following:
 
 ## Running
 
-## Ubuntu
+### Ubuntu
 The scripts/ directory contains a script that can be used with Ubuntu
 upstart. Move it to /etc/init/ directory and ipreg can be
 started/stopped with the start and stop commands in Ubuntu, e.g., sudo
