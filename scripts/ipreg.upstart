@@ -1,0 +1,6 @@
+description "IP address space monitor and registration service"
+ 
+start on filesystem or runlevel [2345]
+stop on run level [!2345]
+ 
+exec start-stop-daemon --start --exec ipreg

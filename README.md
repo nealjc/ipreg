@@ -8,19 +8,26 @@ subnets are shared and IP address usage must be de-conflicted
 by claiming which addresses are in use.
 
 ##Installation
-* Install Go
-* Set $GOPATH 
+
+## Pre-requisites
+* ipreg requires sqlite3 libraries.
+
+## Building from source
+
+* Install Go 1.2+
+* Set $GOPATH. This will be where ipreg will be downloaded to and
+  built from. 
 * Run go get github.com/nealjc/ipreg
-* Run go install github.com/nealjc/ipreg
 * ipreg will now be located at $GOPATH/bin. Add $GOPATH/bin to your
-  path.
+  path, or move the ipreg executable somewhere on your path.
+
+### Configure ipreg for your network
 
 ipreg requires a configuration file at /etc/ipreg.conf. 
 There is a sample configuration file, config.txt, in
 $GOPATH/src/github.com/nealjc/ipreg that can be used
 as a basis for /etc/ipreg.conf.
 
-### Configure ipreg for your network
 Edit the following fields in/etc/ipreg.conf
 
 * DatabaseDir: ipreg will create its database in this directory. It must exist and ipreg must have write access to it.
@@ -39,5 +46,9 @@ Next, edit the index.html file for the following:
 
 ## Running
 
+## Ubuntu
+The scripts/ directory contains a script that can be used with Ubuntu
+upstart. Move it to /etc/init.d/ipreg and ipreg can started/stopped
+with service ipreg start/stop.
 
-*TODO*
+

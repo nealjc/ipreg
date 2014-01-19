@@ -10,7 +10,8 @@ ListenPort = 8080
 ; ipreg will need write permission to this directory
 DatabaseDir = /var/ipreg/
 ; ipreg will need read permission for this directory.
-; The directory should contain the index.html file
+; The directory should contain the index.html file.
+; ipreg will also serve any other files placed in this directory.
 HtmlDir = /var/ipreg/
 
 ; one or more sections for each subnet
