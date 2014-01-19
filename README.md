@@ -18,8 +18,8 @@ by claiming which addresses are in use.
 * Set $GOPATH. This will be where ipreg will be downloaded to and
   built from. 
 * Run go get github.com/nealjc/ipreg
-* ipreg will now be located at $GOPATH/bin. Add $GOPATH/bin to your
-  path, or move the ipreg executable somewhere on your path.
+* ipreg will now be located at $GOPATH/bin. Copy $GOPATH/bin/ipreg to /usr/local/bin
+
 
 ### Configure ipreg for your network
 
@@ -31,8 +31,9 @@ as a basis for /etc/ipreg.conf.
 Edit the following fields in/etc/ipreg.conf
 
 * DatabaseDir: ipreg will create its database in this directory. It must exist and ipreg must have write access to it.
-* HtmlDir: Specifies the directory ipreg will use to serve the main web page. 
-* The remainder of the settings in /etc/ipreg.conf are optional.
+* HtmlDir: Specifies the directory ipreg will use to serve the main web page.
+* Add subnets. DO NOT include any '/'s in Subnet names.
+* The remainder of the settings in /etc/ipreg.conf are optional. 
 
 Copy the $GOPATH/src/github.com/nealjc/ipreg/index.html file to the directory specified in the Html field above.
 
