@@ -101,44 +101,43 @@
 
     </div>
 
-	<form id="edit-form">
-    <div id="edit" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="editRegLabel" aria-hidden="true">
+
+      <div id="edit" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="editRegLabel" aria-hidden="true">
         <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                    <h3 class="modal-title" id="editRegLabel">Edit Registration</h3>
-                </div>
-                <div class="modal-body">
-                    <form class="form-horizontal">
-                        <div class="control-group">
-                            <label class="control-label" for="inputUser">User</label>
-                            <div class="controls">
-                                <input data-bind="value: name" type="text" name="inputUser" id="inputUser" placeholder="Name" style="width: 150px;">
-                            </div>
-                        </div>
-                        <div class="control-group">
-                            <label class="control-label" for="inputEmail">Email</label>
-                            <div class="controls">
-                                <input data-bind="value: email" type="text" name="inputEmail" id="inputEmail" placeholder="Email" style="width: 300px;">
-                            </div>
-                        </div>
-                        <div class="control-group">
-                            <label class="control-label" for="inputNote">Note</label>
-                            <div class="controls">
-                                <input data-bind="value: note" type="text" name="inputNote"  id="inputNote" placeholder="Notes" style="width: 300px;">
-                            </div>
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button data-bind="click: editAddress" class="btn btn-primary">Update Registration</button>
-                    <button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
-                </div>
+          <div class="modal-content">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+              <h3 class="modal-title" id="editRegLabel">Edit Registration</h3>
             </div>
+            <div class="modal-body">
+              <form class="form-horizontal" id="edit-form">
+                <div class="control-group">
+                  <label class="control-label" for="inputUser">User</label>
+                  <div class="controls">
+                    <input data-bind="value: name" type="text" name="inputUser" id="inputUser" placeholder="Name" style="width: 150px;">
+                  </div>
+                </div>
+                <div class="control-group">
+                  <label class="control-label" for="inputEmail">Email</label>
+                  <div class="controls">
+                    <input data-bind="value: email" type="text" name="inputEmail" id="inputEmail" placeholder="Email" style="width: 300px;">
+                  </div>
+                </div>
+                <div class="control-group">
+                  <label class="control-label" for="inputNote">Note</label>
+                  <div class="controls">
+                    <input data-bind="value: note" type="text" name="inputNote"  id="inputNote" placeholder="Notes" style="width: 300px;">
+                  </div>
+                </div>
+              </form>
+            </div>
+            <div class="modal-footer">
+              <button data-bind="click: editAddress" class="btn btn-primary">Update Registration</button>
+              <button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
+            </div>
+          </div>
         </div>
-    </div>
-    </form>
+      </div>
     
     <div id="ajax-error" class="modal fade">
         <div class="modal-dialog">
